@@ -789,4 +789,83 @@ public void streamGame_validInput_200Ok() throws Exception {
         mockMvc.perform(postRequest)
                 .andExpect(status().isForbidden());
     }
+
+    // --- POST /games/{gameId}/force-judge-vote ---
+
+    @Test
+    public void forceJudgeVote_validInput_200Ok() throws Exception {
+        Game game = new Game();
+        game.setId(1L);
+
+        given(gameService.getGame(anyLong())).willReturn(game);
+        doNothing().when(gameService).forceJudgeAutoVote(any(Game.class), anyString());
+
+        MockHttpServletRequestBuilder postRequest = post("/games/1/force-judge-vote")
+                .header("Authorization", "Bearer token123");
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isOk());
+
+        verify(gameService).forceJudgeAutoVote(game, "Bearer token123");
+    }
+
+    @Test
+    public void forceJudgeVote_gameNotFound_404NotFound() throws Exception {
+        given(gameService.getGame(anyLong()))
+                .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Error: The provided id is invalid."));
+
+        MockHttpServletRequestBuilder postRequest = post("/games/99/force-judge-vote")
+                .header("Authorization", "Bearer token123");
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void forceJudgeVote_invalidToken_401Unauthorized() throws Exception {
+        Game game = new Game();
+        game.setId(1L);
+
+        given(gameService.getGame(anyLong())).willReturn(game);
+        doThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token"))
+                .when(gameService).forceJudgeAutoVote(any(Game.class), anyString());
+
+        MockHttpServletRequestBuilder postRequest = post("/games/1/force-judge-vote")
+                .header("Authorization", "Bearer wrong-token");
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void forceJudgeVote_notWriter_403Forbidden() throws Exception {
+        Game game = new Game();
+        game.setId(1L);
+
+        given(gameService.getGame(anyLong())).willReturn(game);
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "Only writers can force a judge auto-vote."))
+                .when(gameService).forceJudgeAutoVote(any(Game.class), anyString());
+
+        MockHttpServletRequestBuilder postRequest = post("/games/1/force-judge-vote")
+                .header("Authorization", "Bearer token123");
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void forceJudgeVote_timerNotExpired_409Conflict() throws Exception {
+        Game game = new Game();
+        game.setId(1L);
+
+        given(gameService.getGame(anyLong())).willReturn(game);
+        doThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Judge timer has not expired yet."))
+                .when(gameService).forceJudgeAutoVote(any(Game.class), anyString());
+
+        MockHttpServletRequestBuilder postRequest = post("/games/1/force-judge-vote")
+                .header("Authorization", "Bearer token123");
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isConflict());
+    }
 }
