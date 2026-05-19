@@ -143,6 +143,14 @@ public class GameController {
     }
 
 
+    @PostMapping("/games/{gameId}/force-judge-vote")
+    @ResponseStatus(HttpStatus.OK)
+    public void forceJudgeVote(@PathVariable Long gameId,
+                            @RequestHeader(value = "Authorization") String bearerToken) {
+        Game currentGame = gameService.getGame(gameId);
+        gameService.forceJudgeAutoVote(currentGame, bearerToken);
+    }
+
     @DeleteMapping("/games/{gameId}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteGame(@PathVariable Long gameId,

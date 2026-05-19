@@ -410,6 +410,104 @@ public class GameServiceIntegrationTest {
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
     }
 
+    // --- forceJudgeAutoVote (Integration) ---
+
+    private Game setupEvaluationGame(long timerSeconds, long elapsedMillis) {
+        Game game = new Game();
+        game.setPhase(GamePhase.EVALUATION);
+        game.setTimer(timerSeconds);
+        game.setTurnStartedAt(System.currentTimeMillis() - elapsedMillis);
+        game.setMaxRounds(10);
+        game.setCurrentRound(1);
+        game.setRoundResolved(false);
+
+        Judge judge = new Judge(user1);
+
+        Writer w1 = new Writer();
+        w1.setUser(user2);
+        w1.setTurn(false);
+
+        Writer w2 = new Writer();
+        w2.setUser(user3);
+        w2.setTurn(false);
+
+        game.setJudges(new ArrayList<>(List.of(judge)));
+        game.setWriters(new ArrayList<>(List.of(w1, w2)));
+
+        Story story = new Story();
+        story.setStoryContributions(new ArrayList<>());
+        game.setStory(story);
+
+        return gameRepository.saveAndFlush(game);
+    }
+
+    @Test
+    public void forceJudgeAutoVote_validWriter_timerExpired_assignsVotes() {
+        // timer=10s, elapsed=20s → timer has expired
+        Game game = setupEvaluationGame(10L, 20_000L);
+
+        gameService.forceJudgeAutoVote(game, "Bearer " + user2.getToken());
+
+        assertTrue(gameService.allJudgesVoted(game));
+    }
+
+    @Test
+    public void forceJudgeAutoVote_notWriter_throws403() {
+        Game game = setupEvaluationGame(10L, 20_000L);
+
+        User outsider = new User();
+        outsider.setUsername("outsider");
+        outsider.setPassword("pass");
+        outsider = userService.createUser(outsider);
+
+        User finalOutsider = outsider;
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> gameService.forceJudgeAutoVote(game, "Bearer " + finalOutsider.getToken()));
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+    }
+
+    @Test
+    public void forceJudgeAutoVote_invalidToken_throws401() {
+        Game game = setupEvaluationGame(10L, 20_000L);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> gameService.forceJudgeAutoVote(game, "Bearer fake-token"));
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
+    }
+
+    @Test
+    public void forceJudgeAutoVote_timerNotExpired_throws409() {
+        // timer=60s, elapsed=5s → timer has NOT expired
+        Game game = setupEvaluationGame(60L, 5_000L);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> gameService.forceJudgeAutoVote(game, "Bearer " + user2.getToken()));
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+    }
+
+    @Test
+    public void forceJudgeAutoVote_wrongPhase_doesNothing() {
+        Game game = setupEvaluationGame(10L, 20_000L);
+        game.setPhase(GamePhase.WRITING);
+        gameRepository.saveAndFlush(game);
+
+        gameService.forceJudgeAutoVote(game, "Bearer " + user2.getToken());
+
+        assertFalse(gameService.allJudgesVoted(game));
+    }
+
+    @Test
+    public void forceJudgeAutoVote_allJudgesAlreadyVoted_doesNotAddDuplicateVotes() {
+        Game game = setupEvaluationGame(10L, 20_000L);
+
+        gameService.forceJudgeAutoVote(game, "Bearer " + user2.getToken());
+        assertTrue(gameService.allJudgesVoted(game));
+
+        // calling a second time must not throw and must keep the count stable
+        gameService.forceJudgeAutoVote(game, "Bearer " + user2.getToken());
+        assertTrue(gameService.allJudgesVoted(game));
+    }
+
     // --- insertWriterInput (Integration) ---
 
     @Test
