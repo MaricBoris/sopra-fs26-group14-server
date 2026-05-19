@@ -442,13 +442,14 @@ public class GameServiceIntegrationTest {
     }
 
     @Test
-    public void forceJudgeAutoVote_validWriter_timerExpired_assignsVotes() {
+    public void forceJudgeAutoVote_validWriter_timerExpired_resolvesRound() {
         // timer=10s, elapsed=20s → timer has expired
         Game game = setupEvaluationGame(10L, 20_000L);
 
         gameService.forceJudgeAutoVote(game, "Bearer " + user2.getToken());
 
-        assertTrue(gameService.allJudgesVoted(game));
+        assertEquals(GamePhase.FINISHED, game.getPhase());
+        assertNotNull(game.getStory().getWinner());
     }
 
     @Test
@@ -493,19 +494,22 @@ public class GameServiceIntegrationTest {
 
         gameService.forceJudgeAutoVote(game, "Bearer " + user2.getToken());
 
-        assertFalse(gameService.allJudgesVoted(game));
+        assertEquals(GamePhase.WRITING, game.getPhase());
+        assertNull(game.getStory().getWinner());
     }
 
     @Test
-    public void forceJudgeAutoVote_allJudgesAlreadyVoted_doesNotAddDuplicateVotes() {
+    public void forceJudgeAutoVote_winnerAlreadySet_isIdempotent() {
         Game game = setupEvaluationGame(10L, 20_000L);
 
         gameService.forceJudgeAutoVote(game, "Bearer " + user2.getToken());
-        assertTrue(gameService.allJudgesVoted(game));
+        assertEquals(GamePhase.FINISHED, game.getPhase());
+        assertNotNull(game.getStory().getWinner());
 
-        // calling a second time must not throw and must keep the count stable
+        // second call must not throw and must leave game unchanged
         gameService.forceJudgeAutoVote(game, "Bearer " + user2.getToken());
-        assertTrue(gameService.allJudgesVoted(game));
+        assertEquals(GamePhase.FINISHED, game.getPhase());
+        assertNotNull(game.getStory().getWinner());
     }
 
     // --- insertWriterInput (Integration) ---

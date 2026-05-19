@@ -456,8 +456,8 @@ public class GameService {
         }
     }
 
-    //needed if the judge quietly leaves, so the writers are not stuck for eternity
-    public void forceJudgeAutoVote(Game currentGame, String bearerToken) {
+   //needed if the judge quietly leaves, so the writers are not stuck for eternity
+    public synchronized void forceJudgeAutoVote(Game currentGame, String bearerToken) {
         // check if the caller is a writer in the current game
         String token = userService.extractToken(bearerToken);
         User requestingUser = getandCheckUser(token); //check if user with that token really exists
@@ -475,9 +475,9 @@ public class GameService {
         }
 
         //Only allow these force votes in evaluation phase
-        if (currentGame.getPhase() != GamePhase.EVALUATION) return; 
+        if (currentGame.getPhase() != GamePhase.EVALUATION) return;
 
-         // check, if the judge timer has really elapsed
+        // check, if the judge timer has really elapsed
         if (currentGame.getTurnStartedAt() == null || currentGame.getTimer() == null) return;
         long elapsed = (System.currentTimeMillis() - currentGame.getTurnStartedAt()) / 1000;
         if (elapsed < currentGame.getTimer()) {
@@ -485,14 +485,18 @@ public class GameService {
                     "Judge timer has not expired yet.");
         }
 
-        // check, if already resolved, then we don't need to do anything
-        if (allJudgesVoted(currentGame)) return;
+        // if the round has already been resolved (winner exists or phase advanced), nothing to do
+        if (currentGame.getStory() != null && currentGame.getStory().getWinner() != null) return;
+        if (currentGame.getPhase() != GamePhase.EVALUATION) return;
 
-        // does the same thing as the judge autovote, just assigns a new writer as vote
-        Writer emptyVote = new Writer();
-        for (Judge j : currentGame.getJudges()) {
-            addVote(currentGame, emptyVote, j);
-        }
+        // Force-resolve the round the same way the judge auto vote does
+        Writer winner = determineWinner(currentGame);
+        updateStory(winner, currentGame);
+        clearVotes(currentGame);
+        cleanupGame(currentGame);
+
+        gameRepository.saveAndFlush(currentGame);
+        
     }
 
     private void resolveVoting(Game game) {
