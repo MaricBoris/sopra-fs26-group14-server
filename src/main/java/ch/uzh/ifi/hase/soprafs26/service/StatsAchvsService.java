@@ -56,6 +56,25 @@ public class StatsAchvsService {
         userRepository.save(loser);
     }
 
+    // stats patch, we make +1 for gamesplayed writers (not judge!) and winsasjudge +1 for judge and rookiescribe for writers
+    public void processUnresolvedGame(Game game) {
+        List<Writer> writers = game.getWriters();
+        List<Judge> judges = game.getJudges();
+
+        for (Writer w : writers) {
+            User u = w.getUser();
+            u.getStatistics().recordUnresolved();
+            setUserAchievements(u);
+            userRepository.save(u);
+        }
+
+        for (Judge j : judges) {
+            User u = j.getUser();
+            u.getStatistics().setWinsAsJudge(u.getStatistics().getWinsAsJudge() + 1);
+            setUserAchievements(u);
+            userRepository.save(u);
+        }
+    }
     private void setStats(User user, boolean won, String genre, boolean isSuddenDeath, boolean isUnanimous) {
         UserStatistics stats = user.getStatistics();
         if (won) {

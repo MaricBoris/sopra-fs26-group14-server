@@ -77,6 +77,12 @@ public class UserStatistics implements Serializable {
         }
     }
 
+    // stats patch: currently also resets the win streak, not sure if this is good?
+    public void recordUnresolved() {
+        this.gamesPlayed++;
+        this.currentWinStreak = 0;
+    }
+
     // --- GETTERS AND SETTERS ---
 
     public Long getId() { return id; }

@@ -133,13 +133,12 @@ public class GameController {
 
         gameService.updateStory(winner, currentGame);
 
-
+        gameService.finalizeAutoVotedRound(currentGame);
         gameService.clearVotes(currentGame);
-
-        gameService.cleanupGame(currentGame);
 
         gameStreamService.sendGameToAllClients(currentGame);
         return DTOMapper.INSTANCE.convertEntityToGameGetDTO(currentGame);
+    
     }
 
 

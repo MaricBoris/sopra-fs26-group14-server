@@ -22,6 +22,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
 
 public class GameServiceTest {
@@ -1119,7 +1120,7 @@ public class GameServiceTest {
         Game game = createGameWith(List.of(writer, writer(20L)), List.of(judge(30L)));
         mockExitDependencies(game, user);
 
-        String longInput = "a".repeat(201);
+        String longInput = "a".repeat(2001);
         assertThrows(ResponseStatusException.class, () -> gameService.saveWriterDraft(1L, longInput, "Bearer token"));
     }
 
@@ -1486,5 +1487,80 @@ public class GameServiceTest {
         when(userRepository.findByToken("token")).thenReturn(judgeUser);
 
         assertThrows(ResponseStatusException.class, () -> gameService.reduceTime(1L, "Bearer token"));
+    }
+
+    // ==================== finalizeAutoVotedRound ====================
+
+    @Test
+    public void finalizeAutoVotedRound_storyHasWinner_callsProcessGameResultsAndCleanup() {
+        Story story = new Story();
+        story.setHasWinner(true);
+
+        Game game = new Game();
+        game.setId(1L);
+        game.setPhase(GamePhase.EVALUATION);
+        game.setStory(story);
+        game.setWriters(new ArrayList<>(List.of(new Writer())));
+        game.setJudges(new ArrayList<>(List.of(new Judge())));
+
+        gameService.finalizeAutoVotedRound(game);
+
+        verify(statsAchvsService, times(1)).processGameResults(game, true);
+        verify(statsAchvsService, never()).processUnresolvedGame(any());
+        assertEquals(GamePhase.FINISHED, game.getPhase());
+    }
+
+    @Test
+    public void finalizeAutoVotedRound_storyHasNoWinner_callsProcessUnresolvedAndCleanup() {
+        Story story = new Story();
+        story.setHasWinner(false);
+
+        Game game = new Game();
+        game.setId(1L);
+        game.setPhase(GamePhase.EVALUATION);
+        game.setStory(story);
+        game.setWriters(new ArrayList<>(List.of(new Writer())));
+        game.setJudges(new ArrayList<>(List.of(new Judge())));
+
+        gameService.finalizeAutoVotedRound(game);
+
+        verify(statsAchvsService, never()).processGameResults(any(), anyBoolean());
+        verify(statsAchvsService, times(1)).processUnresolvedGame(game);
+        assertEquals(GamePhase.FINISHED, game.getPhase());
+    }
+
+    @Test
+    public void finalizeAutoVotedRound_storyIsNull_callsProcessUnresolvedAndCleanup() {
+        Game game = new Game();
+        game.setId(1L);
+        game.setPhase(GamePhase.EVALUATION);
+        game.setStory(null);
+        game.setWriters(new ArrayList<>(List.of(new Writer())));
+        game.setJudges(new ArrayList<>(List.of(new Judge())));
+
+        gameService.finalizeAutoVotedRound(game);
+
+        verify(statsAchvsService, never()).processGameResults(any(), anyBoolean());
+        verify(statsAchvsService, times(1)).processUnresolvedGame(game);
+        assertEquals(GamePhase.FINISHED, game.getPhase());
+    }
+
+    @Test
+    public void finalizeAutoVotedRound_storyHasNullHasWinner_callsProcessUnresolvedAndCleanup() {
+        Story story = new Story();
+        story.setHasWinner(null);
+
+        Game game = new Game();
+        game.setId(1L);
+        game.setPhase(GamePhase.EVALUATION);
+        game.setStory(story);
+        game.setWriters(new ArrayList<>(List.of(new Writer())));
+        game.setJudges(new ArrayList<>(List.of(new Judge())));
+
+        gameService.finalizeAutoVotedRound(game);
+
+        verify(statsAchvsService, never()).processGameResults(any(), anyBoolean());
+        verify(statsAchvsService, times(1)).processUnresolvedGame(game);
+        assertEquals(GamePhase.FINISHED, game.getPhase());
     }
 }
