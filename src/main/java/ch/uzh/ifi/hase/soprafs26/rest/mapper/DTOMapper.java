@@ -93,6 +93,7 @@ public interface DTOMapper {
     @Mapping(source = "objective", target = "objective")
     @Mapping(source = "tieBreakerQuote", target = "tieBreakerQuote")
     @Mapping(source = "title", target = "title")
+    @Mapping(expression = "java(story.getJudges().stream().map(u -> u.getUsername()).collect(java.util.stream.Collectors.toList()))", target = "judgeUsernames")
     StoryGetDTO convertEntityToStoryGetDTO(Story story);
 
     @Mapping(source = "id", target = "gameId")

@@ -18,6 +18,7 @@ public class StoryGetDTO {
     private String objective;
     private String tieBreakerQuote;
     private String title;
+    private List<String> judgeUsernames = new ArrayList<>();
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -51,4 +52,7 @@ public class StoryGetDTO {
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+
+    public List<String> getJudgeUsernames() { return judgeUsernames; }
+    public void setJudgeUsernames(List<String> judgeUsernames) { this.judgeUsernames = judgeUsernames; }
 }
