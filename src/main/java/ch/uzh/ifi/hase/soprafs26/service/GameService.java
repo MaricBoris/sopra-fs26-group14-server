@@ -492,12 +492,14 @@ public class GameService {
         // Force-resolve the round the same way the judge auto vote does
         Writer winner = determineWinner(currentGame);
         updateStory(winner, currentGame);
+        finalizeAutoVotedRound(currentGame);
         clearVotes(currentGame);
-        cleanupGame(currentGame);
 
         gameRepository.saveAndFlush(currentGame);
         
     }
+        
+    
 
     private void resolveVoting(Game game) {
         Writer winner = determineWinner(game);
@@ -546,6 +548,22 @@ public class GameService {
         // Push the state change to all clients instantly
         gameStreamService.sendGameToAllClients(game);
     }
+
+    // Part 1 correct stats
+   
+    public void finalizeAutoVotedRound(Game game) {
+        Story story = game.getStory();
+        //to be safe, because maybe it's null and not a boolean, and then the comparison is still just false
+        if (story != null && Boolean.TRUE.equals(story.getHasWinner())) { //just in case of some race condition that judge managed to vote, but not in time, but we would actually have a vote
+            statsAchvsService.processGameResults(game, true);
+        } else {
+            statsAchvsService.processUnresolvedGame(game);
+        }
+        cleanupGame(game);
+    }
+
+   
+   
 
     public boolean allJudgesVoted(Game currentGame) {
         return noVote == currentGame.getJudges().size();
