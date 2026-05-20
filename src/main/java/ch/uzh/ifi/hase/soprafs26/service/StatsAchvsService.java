@@ -88,7 +88,7 @@ public class StatsAchvsService {
     private void setUserAchievements(User user) {
         UserStatistics stats = user.getStatistics();
 
-        if (stats.getGamesPlayed() == 1) grant(user, AchievementType.ROOKIE_SCRIBE);
+        if (stats.getGamesPlayed() + stats.getGamesTie() == 1) grant(user, AchievementType.ROOKIE_SCRIBE);
         if (stats.getGamesWon() >= 20) grant(user, AchievementType.PUBLISHED_AUTHOR);
 
         if (stats.getWinsByGenre().getOrDefault("Horror", 0) >= 10)
