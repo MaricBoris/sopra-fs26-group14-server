@@ -395,7 +395,7 @@ public class GameService {
 
         String prettyInput = (inputText == null) ? "" : inputText;
 
-        if (prettyInput.length() > 200) {
+        if (prettyInput.length() > 2000) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Input too long");
         }
 
