@@ -44,14 +44,14 @@ public class StatsAchvsServiceTest {
         winner = createUser(1L, "winnerUser");
         loser = createUser(2L, "loserUser");
         judge1 = createUser(3L, "judgeOne");
-        judge2 = createUser(4L, "judgeTwo");
 
         // Setup Story
         story = new Story();
         story.setWinner(winner);
         story.setLoser(loser);
         story.setWinGenre("Horror");
-        story.setJudges(Arrays.asList(judge1, judge2));
+        story.setJudges(Collections.singletonList(judge1));
+        story.setHasWinner(true);
 
         // Setup Game
         game = new Game();
@@ -99,9 +99,7 @@ public class StatsAchvsServiceTest {
         assertEquals(1, loser.getStatistics().getGamesLost());
 
         // Verify Judges Stats
-        assertEquals(1, judge1.getStatistics().getWinsAsJudge());
         assertEquals(1, judge1.getStatistics().getTotalVotesCast());
-        assertEquals(1, judge2.getStatistics().getWinsAsJudge());
 
         // Verifies the save calls were triggered
         verify(userRepository).save(winner);
@@ -263,7 +261,7 @@ public class StatsAchvsServiceTest {
 
         // Verify winner took the throne
         assertEquals(winner.getId(), gm.getCurrentMaster().getId());
-        assertEquals(2, gm.getVotes().get(winner.getId()));
+        assertEquals(1, gm.getVotes().get(winner.getId()));
     }
 
     @Test
@@ -284,7 +282,7 @@ public class StatsAchvsServiceTest {
 
         // Verify winner stayed master, points increased by 2
         assertEquals(winner, gm.getCurrentMaster());
-        assertEquals(12, gm.getVotes().get(winner.getId()));
+        assertEquals(11, gm.getVotes().get(winner.getId()));
         verify(userRepository, never()).findById(anyLong());
     }
 

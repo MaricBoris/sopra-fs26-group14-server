@@ -1119,7 +1119,7 @@ public class GameServiceTest {
         Game game = createGameWith(List.of(writer, writer(20L)), List.of(judge(30L)));
         mockExitDependencies(game, user);
 
-        String longInput = "a".repeat(201);
+        String longInput = "a".repeat(2001);
         assertThrows(ResponseStatusException.class, () -> gameService.saveWriterDraft(1L, longInput, "Bearer token"));
     }
 

@@ -9,6 +9,7 @@ import ch.uzh.ifi.hase.soprafs26.entity.Game;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.game.GameGetDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs26.service.GameService;
+import ch.uzh.ifi.hase.soprafs26.service.StatsAchvsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ch.uzh.ifi.hase.soprafs26.service.GameStreamService;
@@ -20,11 +21,13 @@ public class GameController {
 
     private final GameService gameService;
     private final GameStreamService gameStreamService;
+    private final StatsAchvsService statsAchvsService;
 
 
-    GameController(GameService gameService, GameStreamService gameStreamService) {
+    GameController(GameService gameService, GameStreamService gameStreamService, StatsAchvsService statsAchvsService) {
         this.gameService = gameService;
         this.gameStreamService = gameStreamService;
+        this.statsAchvsService = statsAchvsService;
     }
 
     @GetMapping("/games/{gameid}")
@@ -132,6 +135,8 @@ public class GameController {
         Writer winner = gameService.determineWinner(currentGame);
 
         gameService.updateStory(winner, currentGame);
+
+        statsAchvsService.processGameResults(currentGame, false);
 
 
         gameService.clearVotes(currentGame);

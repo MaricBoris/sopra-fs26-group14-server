@@ -37,13 +37,27 @@ public class StatsAchvsService {
 
         boolean isSuddenDeath = game.getStory().getTieBreakerQuote() != null;
 
-        setStats(winner, true, genre, isSuddenDeath, isUnanimous);
-        setStats(loser, false, genre, isSuddenDeath, false);
+        setStats(winner, true, genre, isSuddenDeath, isUnanimous, story.getHasWinner());
+        setStats(loser, false, genre, isSuddenDeath, false, story.getHasWinner());
 
-        for (User judge : judges) {
-            judge.getStatistics().setWinsAsJudge(judge.getStatistics().getWinsAsJudge() + 1);
-            judge.getStatistics().setTotalVotesCast(judge.getStatistics().getTotalVotesCast() + 1);
+        if (judges.size() == 1) {
+            User judge = judges.get(0);
+            if (story.getHasWinner()) {
+                judge.getStatistics().setTotalVotesCast(judge.getStatistics().getTotalVotesCast() + 1);
+            }
+            else {
+                judge.getStatistics().setGamesNotVoted(judge.getStatistics().getGamesNotVoted() + 1);
+            }
         }
+
+        /*
+        else {
+            for (User judge : judges) {
+                judge.getStatistics().setWinsAsJudge(judge.getStatistics().getWinsAsJudge() + 1);
+                judge.getStatistics().setTotalVotesCast(judge.getStatistics().getTotalVotesCast() + 1);
+            }
+        }
+         */
 
         setUserAchievements(winner);
         setUserAchievements(loser);
@@ -56,8 +70,14 @@ public class StatsAchvsService {
         userRepository.save(loser);
     }
 
-    private void setStats(User user, boolean won, String genre, boolean isSuddenDeath, boolean isUnanimous) {
+    private void setStats(User user, boolean won, String genre, boolean isSuddenDeath, boolean isUnanimous, boolean hasWinner) {
         UserStatistics stats = user.getStatistics();
+
+        if (!hasWinner) {
+            stats.setGamesTie(stats.getGamesTie() + 1);
+            return;
+        }
+
         if (won) {
             stats.recordWin(genre, isSuddenDeath, isUnanimous);
         } else {

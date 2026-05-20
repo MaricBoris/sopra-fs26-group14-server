@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs26.entity.*;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.game.GameInputDTO;
 import ch.uzh.ifi.hase.soprafs26.service.GameService;
 import ch.uzh.ifi.hase.soprafs26.service.GameStreamService;
+import ch.uzh.ifi.hase.soprafs26.service.StatsAchvsService;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.hamcrest.Matchers.is;
@@ -48,6 +49,9 @@ public class GameControllerTest {
 
     @MockitoBean
     private GameStreamService gameStreamService;
+
+    @MockitoBean
+    private StatsAchvsService statsAchvsService;
 
     @Test
     public void vote_validInput_200Ok() throws Exception {

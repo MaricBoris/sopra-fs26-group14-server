@@ -492,6 +492,7 @@ public class GameService {
         // Force-resolve the round the same way the judge auto vote does
         Writer winner = determineWinner(currentGame);
         updateStory(winner, currentGame);
+        statsAchvsService.processGameResults(currentGame, false);
         clearVotes(currentGame);
         cleanupGame(currentGame);
 
@@ -703,7 +704,7 @@ public class GameService {
         }
     }
 
-    // 📝 find the active game for the authenticated user (as writer or judge)
+    // find the active game for the authenticated user (as writer or judge)
     public Game getGameForUser(String bearerToken) {
         User user = userService.findUserFromToken(userService.extractToken(bearerToken));
 

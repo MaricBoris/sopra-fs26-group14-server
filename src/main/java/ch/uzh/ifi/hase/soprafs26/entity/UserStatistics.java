@@ -20,6 +20,7 @@ public class UserStatistics implements Serializable {
     private Integer gamesPlayed = 0;
     private Integer gamesWon = 0;
     private Integer gamesLost = 0;
+    private Integer gamesTie = 0;
 
     // --- STREAKS ---
     private Integer currentWinStreak = 0;
@@ -29,6 +30,7 @@ public class UserStatistics implements Serializable {
     private Integer winsAsWriter = 0;
     private Integer winsAsJudge = 0; // "Wins" as judge could be: voted for the eventual winner
     private Integer totalVotesCast = 0;
+    private Integer gamesNotVoted = 0;
 
     // --- GENRE MASTERY (The Core of S34) ---
     @ElementCollection(fetch = FetchType.EAGER)
@@ -94,6 +96,9 @@ public class UserStatistics implements Serializable {
     public Integer getGamesLost() { return gamesLost; }
     public void setGamesLost(Integer gamesLost) { this.gamesLost = gamesLost; }
 
+    public Integer getGamesTie() { return gamesTie; }
+    public void setGamesTie(Integer gamesTie) { this.gamesTie = gamesTie; }
+
     public Integer getCurrentWinStreak() { return currentWinStreak; }
     public void setCurrentWinStreak(Integer currentWinStreak) { this.currentWinStreak = currentWinStreak; }
 
@@ -108,6 +113,12 @@ public class UserStatistics implements Serializable {
 
     public Integer getTotalVotesCast() { return totalVotesCast; }
     public void setTotalVotesCast(Integer totalVotesCast) { this.totalVotesCast = totalVotesCast; }
+
+    public Integer getGamesNotVoted() { return gamesNotVoted; }
+
+    public void setGamesNotVoted(Integer gamesNotVoted) {
+        this.gamesNotVoted = gamesNotVoted;
+    }
 
     public Map<String, Integer> getWinsByGenre() { return winsByGenre; }
     public void setWinsByGenre(Map<String, Integer> winsByGenre) { this.winsByGenre = winsByGenre; }

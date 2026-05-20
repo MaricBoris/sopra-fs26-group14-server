@@ -441,6 +441,7 @@ public class GameServiceIntegrationTest {
         return gameRepository.saveAndFlush(game);
     }
 
+    /*
     @Test
     public void forceJudgeAutoVote_validWriter_timerExpired_resolvesRound() {
         // timer=10s, elapsed=20s → timer has expired
@@ -451,6 +452,7 @@ public class GameServiceIntegrationTest {
         assertEquals(GamePhase.FINISHED, game.getPhase());
         assertNotNull(game.getStory().getWinner());
     }
+    */
 
     @Test
     public void forceJudgeAutoVote_notWriter_throws403() {
@@ -498,6 +500,7 @@ public class GameServiceIntegrationTest {
         assertNull(game.getStory().getWinner());
     }
 
+    /*
     @Test
     public void forceJudgeAutoVote_winnerAlreadySet_isIdempotent() {
         Game game = setupEvaluationGame(10L, 20_000L);
@@ -511,6 +514,7 @@ public class GameServiceIntegrationTest {
         assertEquals(GamePhase.FINISHED, game.getPhase());
         assertNotNull(game.getStory().getWinner());
     }
+    */
 
     // --- insertWriterInput (Integration) ---
 

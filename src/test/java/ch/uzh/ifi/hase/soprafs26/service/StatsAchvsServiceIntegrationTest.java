@@ -72,6 +72,7 @@ public class StatsAchvsServiceIntegrationTest {
         story.setLoser(loser);
         story.setWinGenre("Horror");
         story.setJudges(new ArrayList<>(List.of(judge)));
+        story.setHasWinner(true);
 
         game = new Game();
         game.setId(1L);
@@ -117,7 +118,7 @@ public class StatsAchvsServiceIntegrationTest {
         assertEquals(1, dbWinner.getStatistics().getGamesWon());
         assertEquals(1, dbWinner.getStatistics().getWinsByGenre().get("Horror"));
         assertEquals(1, dbLoser.getStatistics().getGamesLost());
-        assertEquals(1, dbJudge.getStatistics().getWinsAsJudge());
+        assertEquals(1, dbJudge.getStatistics().getTotalVotesCast());
 
         boolean winnerHasRookie = dbWinner.getAchievements().stream()
                 .anyMatch(a -> a.getAchievement().getName().equals("ROOKIE_SCRIBE"));
