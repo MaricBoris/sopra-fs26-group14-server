@@ -83,6 +83,16 @@ public class UserStatistics implements Serializable {
         this.currentWinStreak = 0;
     }
 
+    //stats fix2: count the words written correctly
+    public void addWordsWritten(long words) {
+        if (this.totalWordsWritten == null) {
+            this.totalWordsWritten = 0L;
+        }
+        if (words > 0) {
+            this.totalWordsWritten += words;
+        }
+    }
+    
     // --- GETTERS AND SETTERS ---
 
     public Long getId() { return id; }

@@ -161,6 +161,29 @@ public class GameService {
         return "";
     }
 
+    // stats patch2: count words, or actually just all the things that are separated by whitespaces in our case, because how to identifiy actual words?
+    private long countWords(String text) {
+        if (text == null) return 0L;
+        String trimmed = text.trim();
+        if (trimmed.isBlank()) return 0L;
+        // \s is the whitespaces of all sort class (counts " " as well as \n and stuff) and \s+ counts all whitespaces after each other, so that we do not split after each seperate " "
+        long count = 0;
+        for (String token : text.trim().split("\\s+")) {
+            boolean probablyAWord =false;
+            for (int i = 0; i < token.length(); i++) {
+                if (Character.isLetterOrDigit(token.charAt(i))) { //only count "words" that contain a letter or digit
+                    probablyAWord=true;
+                }
+            }
+            if (probablyAWord){
+                count++;
+            }
+        
+        }
+        return count;
+        // double \ because the java compiler doesn't know \s and would complain about an illegal escape sequence, but \\ is and the compiler makes it a \ and regex engine will then know \s+ as an escape sequence
+    }
+
     // helper method for both manual and auto submit of writer input
     private void addInputToStory(Game playedGame, Writer writer, String input) {
         String clean = (input == null) ? "" : input.trim();
@@ -190,6 +213,11 @@ public class GameService {
 
         if (!clean.isBlank()) {
             story.addContribution(writer.getUser().getId(), clean);
+             // stats patch2 : call the count words statistics method each time we add a writer draft to the story
+            User contributor = writer.getUser();
+            if (contributor != null && contributor.getStatistics() != null) {
+                contributor.getStatistics().addWordsWritten(countWords(clean)); //countwords is the method above that counts the "words" inside the text
+            }
         }
 
         writer.setText("");

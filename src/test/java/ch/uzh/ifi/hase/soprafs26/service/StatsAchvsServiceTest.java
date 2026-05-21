@@ -288,6 +288,39 @@ public class StatsAchvsServiceTest {
         verify(userRepository, never()).findById(anyLong());
     }
 
+    // --- addWordsWritten Tests ---
+
+    @Test
+    public void addWordsWritten_positiveWords_increasesTotal() {
+        UserStatistics stats = new UserStatistics();
+        stats.addWordsWritten(50);
+        assertEquals(50L, stats.getTotalWordsWritten());
+    }
+
+    @Test
+    public void addWordsWritten_calledMultipleTimes_accumulates() {
+        UserStatistics stats = new UserStatistics();
+        stats.addWordsWritten(30);
+        stats.addWordsWritten(20);
+        assertEquals(50L, stats.getTotalWordsWritten());
+    }
+
+    @Test
+    public void addWordsWritten_zeroWords_doesNotChangeTotal() {
+        UserStatistics stats = new UserStatistics();
+        stats.addWordsWritten(10);
+        stats.addWordsWritten(0);
+        assertEquals(10L, stats.getTotalWordsWritten());
+    }
+
+    @Test
+    public void addWordsWritten_nullTotalWordsWritten_initializesAndAdds() {
+        UserStatistics stats = new UserStatistics();
+        stats.setTotalWordsWritten(null);
+        stats.addWordsWritten(25);
+        assertEquals(25L, stats.getTotalWordsWritten());
+    }
+
     // --- Helper ---
     private boolean hasAchievement(User u, AchievementType type) {
         return u.getAchievements().stream()
