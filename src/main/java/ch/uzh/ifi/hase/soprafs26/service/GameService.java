@@ -166,8 +166,22 @@ public class GameService {
         if (text == null) return 0L;
         String trimmed = text.trim();
         if (trimmed.isBlank()) return 0L;
-        return trimmed.split("\\s+").length; // \s is the whitespaces of all sort class (counts " " as well as \n and stuff) and \s+ counts all whitespaces after each other, so that we do not split after each seperate " "
-    // double \ because the java compiler doesn't know \s and would complain about an illegal escape sequence, but \\ is and the compiler makes it a \ and regex engine will then know \s+ as an escape sequence
+        // \s is the whitespaces of all sort class (counts " " as well as \n and stuff) and \s+ counts all whitespaces after each other, so that we do not split after each seperate " "
+        long count = 0;
+        for (String token : text.trim().split("\\s+")) {
+            boolean probablyAWord =false;
+            for (int i = 0; i < token.length(); i++) {
+                if (Character.isLetterOrDigit(token.charAt(i))) { //only count "words" that contain a letter or digit
+                    probablyAWord=true;
+                }
+            }
+            if (probablyAWord){
+                count++;
+            }
+        
+        }
+        return count;
+        // double \ because the java compiler doesn't know \s and would complain about an illegal escape sequence, but \\ is and the compiler makes it a \ and regex engine will then know \s+ as an escape sequence
     }
 
     // helper method for both manual and auto submit of writer input
