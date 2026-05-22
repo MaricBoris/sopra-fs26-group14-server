@@ -154,7 +154,7 @@ Ensure that [Docker](https://www.docker.com/) is installed on the machine you wi
 First, pull (download) the image with the following command:
 
 ```bash
-docker pull maricboris/soprafs26-group-14-server
+docker pull sopragroup14/sopra-fs26-group-14-server
 ```
 
 ### Run
@@ -162,7 +162,7 @@ docker pull maricboris/soprafs26-group-14-server
 Then, run the image in a container with the following command:
 
 ```bash
-docker run -p 8080:8080 maricboris/soprafs26-group-14-server
+docker run -p 8080:8080 sopragroup14/sopra-fs26-group-14-server
 ```
 
 ---
@@ -194,5 +194,6 @@ The judge can also incorporate quotes or use the option of fetching more/less fi
 ---
 
 ## 7. License
+[GPL license](LICENSE)
 
 ---
