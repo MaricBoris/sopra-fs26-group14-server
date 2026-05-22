@@ -14,12 +14,21 @@
 ---
 
 ## 1. Introduction
+StoryWars is a 3-player online narrative game with 2 writers and a judge. Each writer is secretly assigned a genre and must steer a shared story towards it for the duration of the game whilst the opponent is pulling it in the opposite direction. The judge, who is in charge of determining the winner, interferes during the game by forcing quotes into writers' turns and using his ability to reduce a writer's time.
 
 ### Goal
 StoryWars relies on the basic idea of a game in which 2 opposing writers, who have been assigned different genres, attempt to one up one another: the writers thus engage in a narrative duel contributing to a single story in a round-based manner while trying to win the judge’s vote.
 
 ### Motivation
 The core motivation of our game is to provide for a fun writing exercise that has the potential to engage its players through absurd and silly moments, whilst retaining a certain level of pressure provided by time constraints, which are only made worse by the presence of a judge capable of influencing the pace of the game by demanding the incorporation of specific quotes into any of the player’s writings.
+
+### How It Works
+3 players: 2 writers and 1 judge
+* Genres: each writer is secretly assigned a genre
+* Shared theme: the common story setting or hook that both writers must anchor their story to
+* Turns: writers alternate adding to a single shared story, each trying to pull the narrative toward their designated genre
+* Quotes: the judge can assign a random ZenQuotes quote to either writer at any time, the writer must then incorporate it within 2 of their own turns or face pontetial consequences
+* Winning: whoever steered the story most convincingly toward their genre (in the judge's view) wins
 
 ---
 
@@ -43,22 +52,33 @@ The core motivation of our game is to provide for a fun writing exercise that ha
 ### Component 1: REST API based Controllers
 Mainly act as the interface between frontend and the logic handled by the services. The controllers handle the HTTP requests and the mapping of the payloads with a DTO which are passed to the services if needed and vice versa converting the needed data given by the services into payloads that are sent back to the client.
 
+One Controller example:
 [`GameController.java`](src/main/java/ch/uzh/ifi/hase/soprafs26/controller/GameController.java)
 
 ### Component 2: Entity Model
 The Entities represent the way in which we want our Data to be designed . They allow the storing of the logical Pieces such as the User with Achievements, the Game while it’s running, the Story, etc. via the JPA Repositories into tables.
 By coupling these to the services we can set the fields as intended and needed for Users, Game, Stats, etc. and then by using the DTOs these objects can be communicated with client.
 
+One Entity example:
+[`Game.java`](src/main/java/ch/uzh/ifi/hase/soprafs26/entity/Game.java)
+
 ### Component 3: Game and Story logic
 Within the GameService triggered by the GameController we handle the internal logic for processing the game as intended - i.e. creating Game instances, adding player inputs based on turns, handling different voting situations etc.
 Within this Service we additionally set the parameters as needed for the Story that after the game is over is saved to the DB. Also the handling of User Stats and Achievements which is triggered in here.
 
+
+[`GameService.java`](src/main/java/ch/uzh/ifi/hase/soprafs26/service/GameService.java)
+
 ### Component 4: Statistics and Achievements logic
-Within the StatsAndAchvsService we process the Game Results and save them in the DB just like the Story. The Achievements are not just personal, but also include Global features such as whether you are the absolute GenreMaster or in the top percentile.
+Within the StatsAchvsService we process the Game Results and save them in the DB just like the Story. The Achievements are not just personal, but also include Global features such as whether you are the absolute GenreMaster or in the top percentile.
 This logic is triggered by the GameService and GameController in all cases in which a game can end.
+
+[`StatsAchvsService.java`](src/main/java/ch/uzh/ifi/hase/soprafs26/service/StatsAchvsService.java)
 
 ### Component 5: User logic
 Within the UserService we handle everything that has to do with the User instances, including registering, login, logout, changing password or bio and deleting your account. For account deletion it is important that we also update the other tables in the DB in order to keep the stored data consistent.
+
+[`UserService.java`](src/main/java/ch/uzh/ifi/hase/soprafs26/service/UserService.java)
 
 ---
 
