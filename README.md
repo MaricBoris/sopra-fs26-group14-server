@@ -23,7 +23,7 @@ StoryWars relies on the basic idea of a game in which 2 opposing writers, who ha
 The core motivation of our game is to provide for a fun writing exercise that has the potential to engage its players through absurd and silly moments, whilst retaining a certain level of pressure provided by time constraints, which are only made worse by the presence of a judge capable of influencing the pace of the game by demanding the incorporation of specific quotes into any of the player’s writings.
 
 ### How It Works
-3 players: 2 writers and 1 judge
+* 3 players: 2 writers and 1 judge
 * Genres: each writer is secretly assigned a genre
 * Shared theme: the common story setting or hook that both writers must anchor their story to
 * Turns: writers alternate adding to a single shared story, each trying to pull the narrative toward their designated genre
@@ -149,16 +149,21 @@ To configure a debugger for SpringBoot's Tomcat servlet (i.e. the process you st
 
 ## Docker
 
-### Pull and run
-Once the image is created and has been successfully pushed to dockerhub, the image can be run on any machine.\
+### Pull
 Ensure that [Docker](https://www.docker.com/) is installed on the machine you wish to run the container.\
-First, pull (download) the image with the following command, replacing your username and repository name accordingly.
+First, pull (download) the image with the following command:
 
-```docker pull <dockerhub_username>/<dockerhub_repo_name>```
+```bash
+docker pull soprafs26group14/soprafs26-group-14-server
+```
 
-Then, run the image in a container with the following command, again replacing _<dockerhub_username>_ and _<dockerhub_repo_name>_ accordingly.
+### Run
 
-```docker run -p 3000:3000 <dockerhub_username>/<dockerhub_repo_name>```
+Then, run the image in a container with the following command:
+
+```bash
+docker run -p 8080:8080 -e LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB=DEBUG sopra-server
+```
 
 ---
 
