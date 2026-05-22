@@ -154,7 +154,7 @@ Ensure that [Docker](https://www.docker.com/) is installed on the machine you wi
 First, pull (download) the image with the following command:
 
 ```bash
-docker pull soprafs26group14/soprafs26-group-14-server
+docker pull maricboris/soprafs26-group-14-server
 ```
 
 ### Run
@@ -162,7 +162,7 @@ docker pull soprafs26group14/soprafs26-group-14-server
 Then, run the image in a container with the following command:
 
 ```bash
-docker run -p 8080:8080 -e LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB=DEBUG sopra-server
+docker run -p 8080:8080 maricboris/soprafs26-group-14-server
 ```
 
 ---
@@ -170,17 +170,26 @@ docker run -p 8080:8080 -e LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB=DEBUG sopra-ser
 ## 5. Roadmap
 
 ### Feature 1: Multiple Judges
-There is already some effort towards handling multiple judges. However, the game flow design behind it is not fleshed out which leaves this features as not done yet and in the need of correction and advancement
+There is already some effort towards handling multiple judges. However, the game flow design behind it is not fleshed out which leaves this features as not done yet and in the need of correction and advancement.
 
 ### Feature 2: Interactive effect cards
 The addition of a pool of cards which can be used by the writers and maybe even the judge. The effects could be for example that the opponent is forced to use three words with length being at least 16, or you can give yourself extra time, etc.
 
 ### Feature 3: Judge Quote
-The judge can also incorporate quotes himself or use the option of fetching more/less fitting random quotes.
+The judge can also incorporate quotes or use the option of fetching more/less fitting random quotes.
 
 ---
 
 ## 6. Authors and Acknowledgment
+* [@AntoGrgic49](https://github.com/AntoGrgic49)
+
+* [@MaricBoris](https://github.com/MaricBoris)
+
+* [@elvivbert](https://github.com/elvivbert)
+
+* [@Monato11](https://github.com/Monato11)
+
+* [@thomashonzi](https://github.com/thomashonzi)
 
 ---
 
