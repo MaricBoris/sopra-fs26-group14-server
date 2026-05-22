@@ -194,6 +194,6 @@ The judge can also incorporate quotes or use the option of fetching more/less fi
 ---
 
 ## 7. License
-[GPL license](LICENSE)
+This project is licensed under the [GNU General Public License v3](LICENSE).
 
 ---
