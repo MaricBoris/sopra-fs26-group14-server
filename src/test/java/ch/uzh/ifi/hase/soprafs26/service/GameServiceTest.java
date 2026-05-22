@@ -926,8 +926,13 @@ public class GameServiceTest {
         User judge = user(1L);
         Writer w = writer(2L);
         Game game = gameWith(judge, w, writer(3L));
+        game.setPhase(GamePhase.WRITING);
+        game.setCurrentRound(1);
+        game.setMaxRounds(10);
         when(quoteService.fetchRandomQuote()).thenReturn("quote");
+
         gameService.assignQuote(1L, 1, "Bearer token");
+
         assertEquals("quote", w.getQuote());
         verify(gameRepository).saveAndFlush(game);
     }
@@ -950,9 +955,89 @@ public class GameServiceTest {
     void assignQuote_quoteFetchFails_throws502() {
         User judge = user(1L);
         Game game = gameWith(judge, writer(2L), writer(3L));
+        game.setPhase(GamePhase.WRITING);
+        game.setCurrentRound(1);
+        game.setMaxRounds(10);
         when(quoteService.fetchRandomQuote()).thenReturn(null);
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> gameService.assignQuote(1L, 1, "Bearer token"));
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> gameService.assignQuote(1L, 1, "Bearer token"));
         assertEquals(HttpStatus.BAD_GATEWAY, ex.getStatusCode());
+    }
+
+    @Test
+    void assignQuote_phaseNotWriting_throws409() {
+        User judge = user(1L);
+        Game game = gameWith(judge, writer(2L), writer(3L));
+        game.setPhase(GamePhase.EVALUATION);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> gameService.assignQuote(1L, 1, "Bearer token"));
+        assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+        verify(quoteService, never()).fetchRandomQuote();
+    }
+
+    @Test
+    void assignQuote_invalidPlayer_throws400() {
+        User judge = user(1L);
+        Game game = gameWith(judge, writer(2L), writer(3L));
+        game.setPhase(GamePhase.WRITING);
+        game.setCurrentRound(1);
+        game.setMaxRounds(10);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> gameService.assignQuote(1L, 3, "Bearer token"));
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        verify(quoteService, never()).fetchRandomQuote();
+    }
+
+    @Test
+    void assignQuote_alreadyAssigned_throws409() {
+        User judge = user(1L);
+        Writer w = writer(2L);
+        w.setQuote("already has one");
+        Game game = gameWith(judge, w, writer(3L));
+        game.setPhase(GamePhase.WRITING);
+        game.setCurrentRound(1);
+        game.setMaxRounds(10);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> gameService.assignQuote(1L, 1, "Bearer token"));
+        assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+        verify(quoteService, never()).fetchRandomQuote();
+    }
+
+
+    @Test
+    void assignQuote_notEnoughTurnsLeft_throws409() {
+        User judge = user(1L);
+        Writer target = writer(3L); // player 2, turn defaults to false (inactive)
+        Game game = gameWith(judge, writer(2L), target);
+        game.setPhase(GamePhase.WRITING);
+        game.setCurrentRound(4);
+        game.setMaxRounds(6);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> gameService.assignQuote(1L, 2, "Bearer token"));
+        assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+        verify(quoteService, never()).fetchRandomQuote();
+    }
+
+    @Test
+    void assignQuote_fullWindowActiveWriter_setsAssignedRound() {
+        User judge = user(1L);
+        Writer w = writer(2L);
+        w.setTurn(true); // active -> firstTurn == currentRound
+        Game game = gameWith(judge, w, writer(3L));
+        game.setPhase(GamePhase.WRITING);
+        game.setCurrentRound(4);
+        game.setMaxRounds(6);
+        when(quoteService.fetchRandomQuote()).thenReturn("quote");
+
+        gameService.assignQuote(1L, 1, "Bearer token");
+
+        assertEquals("quote", w.getQuote());
+        assertEquals(4, (int) w.getQuoteAssignedRound());
     }
 
     // ==================== getGame with bearer token ====================

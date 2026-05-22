@@ -800,23 +800,42 @@ public class GameService {
         Game playedGame = getandCheckGame(id, token);
         User requestingUser = getandCheckUser(token);
 
-        getJudgeFromUser(requestingUser, playedGame); // throws 403 if not a judge
+        getJudgeFromUser(requestingUser, playedGame); // 403 if not a judge
+
+        if (playedGame.getPhase() != GamePhase.WRITING) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Quotes can only be assigned during the WRITING phase");
+        }
+
+        if (player == null || (player != 1 && player != 2) || playedGame.getWriters().size() < 2) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid player");
+        }
+
+        Writer targetWriter = playedGame.getWriters().get(player - 1);
+
+        if (targetWriter.getQuote() != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Quote already assigned to this writer");
+        }
+
+        int firstTurn = playedGame.getCurrentRound();
+        if (!targetWriter.getTurn()) {
+            firstTurn += 1;
+        }
+        int remainingOwnTurns = (firstTurn > playedGame.getMaxRounds())
+                ? 0
+                : (playedGame.getMaxRounds() - firstTurn) / 2 + 1;
+        if (remainingOwnTurns < 2) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Not enough turns left for this writer to use a quote");
+        }
 
         String quote = quoteService.fetchRandomQuote();
         if (quote == null) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to fetch quote from external API");
         }
 
-        Writer targetWriter = playedGame.getWriters().get(player - 1);
-        if (targetWriter.getQuote() != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Quote already assigned to this writer");
-        }
         targetWriter.setQuote(quote);
-        int assignedRound = playedGame.getCurrentRound();
-        if (!targetWriter.getTurn()) {
-            assignedRound += 1;
-        }
-        targetWriter.setQuoteAssignedRound(assignedRound);
+        targetWriter.setQuoteAssignedRound(firstTurn);
 
         gameRepository.saveAndFlush(playedGame);
         return playedGame;
